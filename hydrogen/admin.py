@@ -18,7 +18,7 @@ class TestAdmin(admin.ModelAdmin):
 	list_display = ('name', 'exam_window_start', 'exam_window_end', 'active', 'time_limit', 'publish_problems', 'max_attempts')
 	inlines = (ProblemInline,)
 	search_fields = ('name',)
-	list_filter = ('active',)
+	list_filter = ('active', 'organization',)
 
 @admin.register(h.models.Problem)
 class ProblemAdmin(admin.ModelAdmin):

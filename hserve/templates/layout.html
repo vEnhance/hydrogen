@@ -21,12 +21,20 @@
       {% endblock %}
       <hr />
       {% block layout-sidebar-global %}
+      <p><a href="{% url 'org-index' %}">About</a></p>
+      <p><a href="{% url 'hydrogen-index' %}">Compete</a></p>
+
+      {% if request.user.is_staff %}
+      <p><a href="{% url 'admin:index' %}">Django admin</a></p>
+      {% endif %}
+
       {% if request.user.is_authenticated %}
-      <b>{{ request.user }}</b>
+      <p>Logged in as: <b>{{ request.user }}</b></p>
       <p><a href="{% url 'logout' %}">Logout</a></p>
       {% else %}
       <p><a href="{% url 'login' %}">Staff login</a></p>
       {% endif %}
+
       {% endblock %}
     </div>
     <div class="col-sm-10 text-left">

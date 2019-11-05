@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block layout-content %}
+<p><b>Hydrogen</b> is a lightweight application
+designed to host short-answer math contests.
+It was originally developed for HMMT by Yang Liu and Evan Chen.</p>
+
+<p>This is a list of contests hosted on this server.</p>
+
+{% for object in object_list %}
+<h3><a href="{{ object.get_absolute_url }}">{{ object }}</a></h3>
+<p>{{ object.short_description|safe }}</p>
+{% endfor %}
+
+{% endblock %}

@@ -15,10 +15,15 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+
+def hydrogen_temp_redirect(request):
+    return HttpResponseRedirect("/hydrogen")
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^hydrogen/', include('hydrogen.urls')),
-    url(r'^', include('core.urls')),
+    url(r'^about/', include('core.urls')),
+    url(r'^$', hydrogen_temp_redirect),
 ]

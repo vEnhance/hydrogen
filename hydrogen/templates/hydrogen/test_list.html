@@ -13,6 +13,11 @@
 {% endif %}
 
 <ul>
+	<li>Organization:
+		<a href="{{ test.organization.get_absolute_url }}">
+		{{ organization }}
+		</a>
+	</li>
 	<li>Start of window: {{ test.exam_window_start|date:"r" }}</li>
 	<li>End of window: {{ test.exam_window_end|date:"r" }}</li>
 	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>

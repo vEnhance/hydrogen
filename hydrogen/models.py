@@ -15,6 +15,9 @@ class Test(models.Model):
 			help_text = "Description of the test (shown on listing).")
 	problems_url = models.CharField(max_length=150,
 			help_text = "The URL to the problems file or page")
+	organization = models.ForeignKey(core.models.Organization,
+			on_delete = models.CASCADE,
+			help_text = "The organization running this contest.")
 
 	exam_window_start = models.DateTimeField(
 			help_text = "Earliest you can start the test")

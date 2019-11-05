@@ -2,12 +2,7 @@
 {% load static %}
 
 {% block layout-sidebar %}
-<h4>Hydrogen</h4>
+<h4>H<sub>2</sub></h4>
 <p><a href="{% url 'active' %}">Active Contests</a></p>
 <p><a href="{% url 'past' %}">Past Contests</a></p>
-{% if request.user.is_superuser %}
-<p><a href="{% url 'admin:app_list' 'hydrogen' %}">
-	H<sub>2</sub> Admin</a></p>
-{% endif %}
-
 {% endblock %}
