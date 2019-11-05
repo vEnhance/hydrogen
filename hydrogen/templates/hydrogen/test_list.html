@@ -1,0 +1,34 @@
+{% extends 'core/layout.html' %}
+
+{% block title %}{{ list_title }}{% endblock %}
+{% block layout-content %}
+<h2>{{ list_title }}</h2>
+
+{% for test in object_list %}
+<hr />
+<h4>{{ test.name }}</h4>
+
+{% if test.description %}
+<p>{{ test.description }}</p>
+{% endif %}
+
+<ul>
+	<li>Start of window: {{ test.exam_window_start|date:"r" }}</li>
+	<li>End of window: {{ test.exam_window_end|date:"r" }}</li>
+	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
+	<li>Attempts per problem: {{ test.max_attempts }}</li>
+</ul>
+<ul>
+	{% if test.active %}
+	<li><b><a href="{% url 'load_key' test.id %}">Enter Contest</a></b>
+	{% endif %}
+	{% if request.user.is_staff %}
+	<li><a href="{% url 'scoreboard' test.id %}">Scoreboard (staff)</a></li>
+	{% endif %}
+	{% if request.user.is_superuser %}
+	<li><a href="{% url 'admin:hydrogen_test_change' test.id  %}">Edit contest (admin)</a></li>
+	{% endif %}
+</ul>
+{% endfor %}
+</ul>
+{% endblock %}

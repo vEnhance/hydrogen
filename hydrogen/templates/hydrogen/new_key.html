@@ -1,0 +1,23 @@
+{% extends 'core/layout.html' %}
+
+{% block title %}Begin {{ test }}{% endblock %}
+{% block layout-content %}
+<h2>Starting {{ test }}</h2>
+<p>To participate in {{ test }}, fill out the form below.
+Once you do so, you will get a page with the problems,
+and a unique URL for you to submit your answers.
+Please save a copy of that URL once you receive it in order to ensure
+that you can access your submission later!</p>
+
+{% if form %}
+{% include 'core/generic-form.html' with form=form %}
+<p>Note that the timer starts immediately
+once you press the above button!
+You cannot change the values after submission,
+so please check everything is entered correctly.</p>
+
+{% else %}
+<p>This test is not currently accepting new submissions.</p>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'core/layout.html' %}
+{% block title %}HMMT Hydrogen{% endblock %}
+
+{% block layout-content %}
+<h2>HMMT Hydrogen</h2>
+
+<h3>Contests</h3>
+<ul>
+<li><b><a href="{% url 'active' %}">Active Contests</a></b> (click here to start)</li>
+<li><a href="{% url 'past' %}">Past Contests</a></li>
+{% if request.user.is_superuser %}
+<li><a href="/admin/hydrogen">Hydrogen Admin (admin)</a></li>
+{% endif %}
+</ul>
+
+<h3>About</h3>
+<p>Welcome to HMMT Hydrogen!
+This system lets you (individually or as a team)
+participate in "live-graded" versions of HMMT tests.</p>
+<p>Here are some hints on how to use the system.</p>
+<ol>
+	<li>To get started go to "Active Contests";
+	you can then enter any contest for which the window has started.</li>
+	<li>You do <i>not</i> need to register a user account to participate.
+	When you enter a contest, you will be asked for just a name and email
+	(no password), and once you submit this information
+	the timer will start automatically.
+	</li>
+	<li>When you enter a contest, you will be given a special link to a page
+		where you can enter answers.
+		We use this link in lieu of an account/password system,
+		so be careful not to lose it.</li>
+	<li><i>Format</i>: Every contest will have:
+		<ul>
+			<li>A total time limit.</li>
+			<li>A set of problems, each with a fixed weight
+			(displayed on the website once the contest starts).</li>
+			<li>A <i>maximum number of attempts</i> per problem.</li>
+		</ul>
+	</li>
+	<li>Online grading is live,
+		meaning you receive feedback immediately on submitted answers.
+		As noted above, there is a maximum number of times you
+		can attempt each problem.</li>
+	<li>Because all contests hosted online here are unofficial events,
+		we do not post rankings visibly anywhere.</li>
+</ol>
+
+{% endblock %}

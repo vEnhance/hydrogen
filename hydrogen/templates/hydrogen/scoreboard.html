@@ -1,0 +1,21 @@
+{% extends 'core/layout.html' %}
+
+{% block title %}Scoreboard for {{ test }} (Staff){% endblock %}
+{% block layout-content %}
+<h2>Scoreboard for {{ test }} (Staff)</h2>
+
+{% if test.accepting_submissions %}
+<p>This test is still accepting submissions, so be careful!.</p>
+{% else %}
+<p>This test is not currently accepting new submissions.</p>
+{% endif %}
+
+<p></p>
+<ol>
+	{% for sub in submissions %}
+	<li>Score <b>{{ sub.total_score }}</b>: {{ sub.display_name }}
+		<a href="{% url 'compete' sub.id %}">(edit)</a>
+	</li>
+	{% endfor %}
+</ol>
+{% endblock %}

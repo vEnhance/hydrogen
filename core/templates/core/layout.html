@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+    {% block layout-header %}
+    NAVIGATION HERE
+    {% endblock %}
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid text-center">
+  <div class="row content">
+    <div class="col-sm-2 sidenav">
+      {% block layout-sidebar %}
+      FURTHER NAVIGATION HERE
+      {% endblock %}
+    </div>
+    <div class="col-sm-10 text-left"> 
+      {% block layout-content %}
+      CONTENT HERE
+      {% endblock %}
+    </div>
+  </div>
+</div>
+
+<footer class="container-fluid text-center">
+{% block layout-footer %}
+FOOTER HERE
+{% endblock %}
+</footer>
+{% endblock %}
+

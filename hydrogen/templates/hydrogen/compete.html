@@ -1,0 +1,107 @@
+{% extends 'core/layout.html' %}
+
+{% block title %}{{ sub_key.display_name }}: {{ test }}{% endblock %}
+
+{% block layout-content %}
+<h2>{{ test }}: {{ sub_key.display_name }}</h2>
+<h4>Downloads</h4>
+{{ test.problems_url }}
+<hr />
+
+<h4>Submit Answer</h4>
+
+<p>Your current score is <b>{{ score }}</b>.</p>
+<p>Each problem allows at most <b>{{ test.max_attempts }}</b> submissions.
+Before you submit an answer, double-check that you are answering
+the correct question!</p>
+
+{# TODO we'll change this #}
+{% include "core/generic-form.html" with form=form %}
+
+<p>You have until <b>{{ sub_key.end_time|date:'Y-m-d G:i:s' }}</b> to submit;
+this is in approximately
+<b> <span id="countdown-hours">0</span> hours,
+	<span id="countdown-minutes">0</span> minutes,
+	<span id="countdown-seconds">0</span> seconds</b>.</p>
+<p>Your team consists of: {{ sub_key.real_name }}.</p>
+
+<p><b>Saving answers</b>:
+Here is a <a href="{% url 'compete' sub_key.id %}">link to this page</a>.
+Please <b>save this URL</B>
+somewhere safe if you need to access this page again!
+You can send this URL to any of your team members
+so they can also submit answers.
+Don't send this link to anyone else
+since any-one with the link can edit your answers.</p>
+<hr />
+
+<h4>Full record</h4>
+<table class="table">
+	<tr>
+	<th>#</th><th>Weight</th><th>Log</th></tr>
+	{% for n, h in history.items %}
+	{% if h.solved %}
+	<tr style="background-color: #cfffe4">
+	{% elif h.attempts|length %}
+	<tr style="background-color: #ffd6e1">
+	{% else %}
+	<tr>
+	{% endif %}
+	<th>#{{ n }}</th>
+	<td>{{ h.weight }} pts</td>
+	<td>
+		<ul>
+		{% for d in h.attempts %}
+		<li>At {{ d.time|date:'Y-m-d G:i:s' }},
+		{% if d.problem__answer != d.student_answer %}
+		submitted {{ d.student_answer }}, INCORRECT.
+		{% else %}
+		submitted <b>{{ d.student_answer }}</b>, <b>SOLVED</b>.
+		{% endif %}
+		</li>
+		{% endfor %}
+		</ul>
+	</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+{# https://snippets.aktagon.com/snippets/273-simple-javascript-countdown-timer #}
+function Countdown(then) {
+	this.then = then;
+	function setElement(id, value) {
+		if (value.length < 2) {
+			value = "0" + value;
+		}
+		window.document.getElementById(id).innerHTML = value;
+	}
+	function countdown() {
+		now           = new Date();
+		diff          = new Date(this.then - now);
+		seconds_left  = Math.floor(diff.valueOf() / 1000);
+		if (seconds_left >= 0) {
+			seconds  = Math.floor(seconds_left / 1) % 60;
+			minutes  = Math.floor(seconds_left / 60) % 60;
+			hours    = Math.floor(seconds_left / 3600);
+		}
+		else {
+			seconds = 0;
+			minutes = 0;
+			hours = 0;
+		}
+		setElement('countdown-hours', hours);
+		setElement('countdown-minutes', minutes);
+		setElement('countdown-seconds', seconds);
+		countdown.timer = setTimeout(countdown, 1000);
+	}
+	function start() {
+		this.timer = setTimeout(countdown, 1000);
+	}
+	start(then);
+}
+Countdown(new Date(1000*{{ sub_key.end_time|date:"U" }}));
+</script>
+{% endblock %}

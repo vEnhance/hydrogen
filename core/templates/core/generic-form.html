@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+
+<form action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% if form.non_field_errors %}
+<ul class="form_error_messages">
+	{% for err in form.non_field_errors %}
+	<li class="form_error_message">{{ err }}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+{{ form|crispy }}
+
+<button type="submit" class="btn btn-success">
+{{ submit_name|default:"Submit" }}
+</button>
+
+</form>
