@@ -21,6 +21,8 @@ class Organization(models.Model):
 	verbose_description = models.TextField(default='',
 			help_text = "A page-long description about the contest. "
 			"HTML OK.")
+	external_url = models.CharField(max_length=80, default='',
+			blank=True, help_text="A website to link to.")
 	
 	def get_absolute_url(self):
 		return reverse("org-view", args=(self.slug,))

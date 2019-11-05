@@ -1,5 +1,17 @@
 {% extends 'layout.html' %}
 {% block layout-content %}
 <h2>{{object}}</h2>
+{% if object.external_url %}
+<a href="{{ object.external_url }}">{{ object.external_url }}</a>
+{% endif %}
+<hr />
 {{ object.verbose_description|safe }}
+
+<hr />
+<p><a href="{% url 'org-index' %}">Back to home</a></p>
+{% if request.user.is_staff %}
+<p><a href="{% url 'admin:core_organization_change' object.id %}">
+	Edit this org</a></p>
+{% endif %}
+
 {% endblock %}
