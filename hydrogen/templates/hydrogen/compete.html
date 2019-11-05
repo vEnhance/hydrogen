@@ -10,7 +10,7 @@ is given by the following URL.</p>
 <a href="#"><b>{{request.build_absolute_uri}}</b></a>
 </p>
 <p>
-Please <b style="color:red;">record this URL somewhere safe</b>!
+Please <i style="color:red;">save this URL somewhere safe</i>!
 You will need this link in order to return to this page.</p>
 <p>You can send this URL to any of your team members
 so they can also submit answers.
@@ -22,8 +22,6 @@ which is in about
 <b> <span id="countdown-hours">0</span> hours,
 	<span id="countdown-minutes">0</span> minutes,
 	<span id="countdown-seconds">0</span> seconds</b>.</p>
-<p>Your team consists of: {{ sub_key.real_name }}.
-<a href="{% url 'update_key' sub_key.id %}">Edit team info.</a></p>
 <hr />
 
 <h4>Problems</h4>
@@ -32,6 +30,8 @@ which is in about
 	<li><a href="{{ test.organization.get_absolute_url }}">
 			Info about {{ test.organization }}</a></li>
 </ul>
+
+<hr />
 
 <h4>Submit Answer</h4>
 
@@ -73,6 +73,11 @@ the correct question!</p>
 	</tr>
 	{% endfor %}
 </table>
+
+<hr />
+<h4>Team information</h4>
+<p>Your team consists of: {{ sub_key.real_name }}.
+<a href="{% url 'update_key' sub_key.id %}">Edit team info.</a></p>
 {% endblock %}
 
 {% block scripts %}
