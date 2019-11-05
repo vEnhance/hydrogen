@@ -11,6 +11,7 @@ import collections
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import F, Sum, Case, When
 from django.views.generic.edit import UpdateView
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 
@@ -203,6 +204,8 @@ def compete(request, sub_id):
 @staff_member_required
 def scoreboard(request, test_id):
 	test = models.Test.objects.get(id = test_id)
+	if not test.organization.check_permission(request.user):
+		raise PermissionDenied("You don't run this contest.")
 
 	# oh boy I love querysets
 	submissions = models.SubmissionKey.objects\

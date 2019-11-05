@@ -1,13 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
-
-import hydrogen as h
-# ^ are you joking me Yang?
+import hydrogen as h # <- are you joking me Yang?
 from import_export import resources, widgets, fields
 from import_export.admin import ImportExportModelAdmin
 
-# Register your models here.
 
 class ProblemInline(admin.TabularInline):
 	model = h.models.Problem
@@ -19,11 +15,30 @@ class TestAdmin(admin.ModelAdmin):
 	inlines = (ProblemInline,)
 	search_fields = ('name',)
 	list_filter = ('active', 'organization',)
+	def get_readonly_fields(self, request, obj=None):
+		return ['organization',] if not request.user.is_superuser \
+				else []
+
+	def has_change_permission(self, request, obj=None):
+		if obj is None: return True
+		return obj.organization.check_permission(request.user)
+	has_view_permission = has_change_permission
+	has_add_permission = has_change_permission
+	has_delete_permission = has_change_permission
 
 @admin.register(h.models.Problem)
 class ProblemAdmin(admin.ModelAdmin):
-	list_display = ('test', 'number', 'answer', 'weight')
+	list_display = ('test', 'number', 'weight')
 	list_filter = ('test', 'test__active',)
+	def get_readonly_fields(self, request, obj=None):
+		return ['test',] if not request.user.is_superuser \
+				else []
+
+	def has_change_permission(self, request, obj=None):
+		return request.user.is_superuser
+	has_view_permission = has_change_permission
+	has_add_permission = has_change_permission
+	has_delete_permission = has_change_permission
 
 @admin.register(h.models.SubmissionKey)
 class SubmissionKeyAdmin(admin.ModelAdmin):

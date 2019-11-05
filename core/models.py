@@ -29,3 +29,8 @@ class Organization(models.Model):
 
 	def __str__(self):
 		return self.name
+
+	def check_permission(self, user):
+		if user.is_superuser: return True
+		if not user.is_staff: return False
+		return user.groups.filter(name=self.group).exists()
