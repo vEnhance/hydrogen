@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block layout-sidebar %}
+<h4>Hydrogen</h4>
 <p><a href="{% url 'active' %}">Active Contests</a></p>
 <p><a href="{% url 'past' %}">Past Contests</a></p>
 {% if request.user.is_superuser %}
