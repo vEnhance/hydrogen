@@ -2,6 +2,7 @@
 {# with gratitude to https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_webpage&stacked=h lmao #}
 
 {% load static %}
+{% load bootstrap3 %}
 
 {% block stylesheets %}
 {% endblock %}
@@ -39,7 +40,7 @@
       {% endblock %}
     </div>
     <div class="col-sm-10 text-left">
-      {# TODO messages #}
+      {% bootstrap_messages %}
       {% block layout-content %}
       {% endblock %}
     </div>
