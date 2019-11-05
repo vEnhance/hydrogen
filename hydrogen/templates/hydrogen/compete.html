@@ -1,11 +1,29 @@
 {% extends 'hydrogen/layout.html' %}
 
-{% block title %}{{ sub_key.display_name }}: {{ test }}{% endblock %}
+{% block title %}{{ test }}: {{ sub_key.display_name }}{% endblock %}
 
 {% block layout-content %}
-<h2>{{ test }}: {{ sub_key.display_name }}</h2>
-<h4>Downloads</h4>
-{{ test.problems_url }}
+<h2>{{ sub_key.display_name }}</h2>
+<p>Your submission for <b>{{ test }}</b>
+is given by the following URL.</p>
+<p align="center">
+<a href="#"><b>{{request.build_absolute_uri}}</b></a>
+</p>
+<p>
+Please <b style="color:red;">record this URL somewhere safe</b>!
+You will need this link in order to return to this page.</p>
+<p>You can send this URL to any of your team members
+so they can also submit answers.
+But do not send this link to anyone else
+since any-one with the link can edit your answers.</p>
+
+<p>Time expires at <b>{{ sub_key.end_time|date:'Y-m-d G:i:s' }}</b>
+which is in about
+<b> <span id="countdown-hours">0</span> hours,
+	<span id="countdown-minutes">0</span> minutes,
+	<span id="countdown-seconds">0</span> seconds</b>.</p>
+<p>Your team consists of: {{ sub_key.real_name }}.
+<a href="{% url 'update_key' sub_key.id %}">Edit team info.</a></p>
 <hr />
 
 <h4>Submit Answer</h4>
@@ -18,24 +36,7 @@ the correct question!</p>
 {# TODO we'll change this #}
 {% include "generic-form.html" with form=form %}
 
-<p>You have until <b>{{ sub_key.end_time|date:'Y-m-d G:i:s' }}</b> to submit;
-this is in approximately
-<b> <span id="countdown-hours">0</span> hours,
-	<span id="countdown-minutes">0</span> minutes,
-	<span id="countdown-seconds">0</span> seconds</b>.</p>
-<p>Your team consists of: {{ sub_key.real_name }}.</p>
-
-<p><b>Saving answers</b>:
-Here is a <a href="{% url 'compete' sub_key.id %}">link to this page</a>.
-Please <b>save this URL</B>
-somewhere safe if you need to access this page again!
-You can send this URL to any of your team members
-so they can also submit answers.
-Don't send this link to anyone else
-since any-one with the link can edit your answers.</p>
-<hr />
-
-<h4>Full record</h4>
+<h4>Full log</h4>
 <table class="table">
 	<tr>
 	<th>#</th><th>Weight</th><th>Log</th></tr>

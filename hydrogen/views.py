@@ -10,6 +10,7 @@ from django.utils import timezone
 import collections
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import F, Sum, Case, When
+from django.views.generic.edit import UpdateView
 
 # Create your views here.
 
@@ -146,6 +147,7 @@ def grade(request, sub_key, attempt, past_attempts):
 def compete(request, sub_id):
 	sub_key = get_object_or_404(models.SubmissionKey, pk = sub_id)
 	test = sub_key.test
+	set_sub_key(request, test.id, sub_id)
 
 	past_attempts = list(models.Attempt.objects.filter(submission_key = sub_key)\
 			.order_by('time').values('student_answer',
@@ -222,3 +224,7 @@ def scoreboard(request, test_id):
 			'test' : test,
 			}
 	return render(request, "hydrogen/scoreboard.html", context)
+
+class UpdateKey(UpdateView):
+	model = models.SubmissionKey
+	fields = ('display_name', 'real_name', 'email')

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import models as auth
 import core
+from django.urls import reverse
 
 import uuid
 from django.utils import timezone
@@ -73,6 +74,8 @@ class SubmissionKey(models.Model):
 			"Set automatically by server.")
 	def __str__(self):
 		return self.display_name + " vs " + str(self.test)
+	def get_absolute_url(self):
+		return reverse("compete", args=(self.id,))
 
 class Problem(models.Model):
 	test = models.ForeignKey(Test,
