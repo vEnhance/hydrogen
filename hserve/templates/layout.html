@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'base.html' %}
 {# with gratitude to https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_temp_webpage&stacked=h lmao #}
 
 {% load static %}
@@ -20,7 +20,12 @@
       {% endblock %}
       <hr />
       {% block layout-sidebar-global %}
-      Login link here later
+      {% if request.user.is_authenticated %}
+      <b>{{ request.user }}</b>
+      <p><a href="{% url 'logout' %}">Logout</a></p>
+      {% else %}
+      <p><a href="{% url 'login' %}">Login</a></p>
+      {% endif %}
       {% endblock %}
     </div>
     <div class="col-sm-10 text-left">
@@ -36,3 +41,7 @@
 
 </footer>
 {% endblock %}
+
+{#
+vim: set expandtab
+#}
