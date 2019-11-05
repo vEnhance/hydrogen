@@ -1,0 +1,7 @@
+db.sqlite3
+**.pyc
+static/*
+media/*
+app.yaml
+venv/
+evanchen-cc-*.json
