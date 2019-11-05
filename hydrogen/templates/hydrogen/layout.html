@@ -1,0 +1,12 @@
+{% extends 'core/layout.html' %}
+{% load static %}
+
+{% block layout-sidebar %}
+<p><a href="{% url 'active' %}">Active Contests</a></p>
+<p><a href="{% url 'past' %}">Past Contests</a></p>
+{% if request.user.is_superuser %}
+<p><a href="{% url 'admin:app_list' 'hydrogen' %}">
+Hydrogen Admin (admin)</a></p>
+{% endif %}
+
+{% endblock %}

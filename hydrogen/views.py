@@ -55,7 +55,8 @@ def new_key(request, test_id):
 	test = get_object_or_404(models.Test, pk = test_id)
 	prev_sub_key = get_sub_key(request, test_id)
 	if prev_sub_key is not None:
-		return HttpResponseRedirect(reverse("compete", args=(prev_sub_key.id,)))
+		return HttpResponseRedirect(
+				reverse("compete", args=(prev_sub_key.id,)))
 
 	if test.window_has_past:
 		messages.warning(request, "Sorry, the window has passed, "
@@ -77,7 +78,8 @@ def new_key(request, test_id):
 					timedelta(minutes=test.time_limit)
 			new_sub_key.save()
 			set_sub_key(request, test_id, str(new_sub_key.id))
-			return HttpResponseRedirect(reverse("compete", args=(new_sub_key.id,)))
+			return HttpResponseRedirect(
+					reverse("compete", args=(new_sub_key.id,)))
 	else:
 		form = NewSubmissionKeyForm()
 	context = {'form' : form, 'test' : test}
@@ -86,9 +88,11 @@ def new_key(request, test_id):
 def load_key(request, test_id):
 	sub_key = get_sub_key(request, test_id)
 	if sub_key is not None:
-		return HttpResponseRedirect(reverse("compete", args=(sub_key.id,)))
+		return HttpResponseRedirect(
+				reverse("compete", args=(sub_key.id,)))
 	else:
-		return HttpResponseRedirect(reverse("new_key", args=(test_id,)))
+		return HttpResponseRedirect(
+				reverse("new_key", args=(test_id,)))
 
 def grade(request, sub_key, attempt, past_attempts):
 	attempt.submission_key = sub_key

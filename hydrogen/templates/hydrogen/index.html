@@ -1,4 +1,4 @@
-{% extends 'core/layout.html' %}
+{% extends 'hydrogen/layout.html' %}
 {% block title %}HMMT Hydrogen{% endblock %}
 
 {% block layout-content %}
@@ -9,7 +9,7 @@
 <li><b><a href="{% url 'active' %}">Active Contests</a></b> (click here to start)</li>
 <li><a href="{% url 'past' %}">Past Contests</a></li>
 {% if request.user.is_superuser %}
-<li><a href="/admin/hydrogen">Hydrogen Admin (admin)</a></li>
+<li><a href="{% url 'admin:app_list' 'hydrogen' %}">Hydrogen Admin (admin)</a></li>
 {% endif %}
 </ul>
 

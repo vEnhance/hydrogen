@@ -1,0 +1,9 @@
+#hserve-header h1 {
+	color: #cc0000;
+	font-family: "Lucida Console", Monaco, monospace;
+}
+
+#page-wrapper {
+	max-width: 800px;
+	margin: auto;
+}
