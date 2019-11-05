@@ -31,9 +31,6 @@ def set_sub_key(request, test_id, sub_id):
 		request.session["hydrogen_session_keys"][test_id] = sub_id
 		request.session.modified = True
 
-def index(request):
-	return render(request, 'hydrogen/index.html', {})
-
 class ActiveTestView(generic.ListView):
 	model = models.Test
 	queryset = models.Test.objects\

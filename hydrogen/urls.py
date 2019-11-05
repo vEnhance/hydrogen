@@ -1,8 +1,12 @@
 from django.conf.urls import url
 from . import views
+from django.shortcuts import redirect
+
+def active_redirect(request):
+	return redirect('active')
 
 urlpatterns = [
-	url(r'^$', views.index, name='hydrogen-index'),
+	url(r'^$', active_redirect, name='hydrogen-index'),
 	url(r'^active/$', views.ActiveTestView.as_view(), name='active'),
 	url(r'^past/$', views.PastTestView.as_view(), name='past'),
 	url(r'^start/(?P<test_id>[0-9]+)/$', views.new_key, name='new_key'),

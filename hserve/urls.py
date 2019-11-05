@@ -16,9 +16,10 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 
 def index_redirect(request):
-    return HttpResponseRedirect("/about")
+    return redirect('org-index')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
