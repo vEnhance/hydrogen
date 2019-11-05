@@ -22,6 +22,9 @@
 	<li>End of window: {{ test.exam_window_end|date:"r" }}</li>
 	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
 	<li>Attempts per problem: {{ test.max_attempts }}</li>
+	{% if not test.window_not_started and test.publish_problems %}
+	<li><a href="{{ test.problems_url }}">Download problems</a></li>
+	{% endif %}
 </ul>
 <ul>
 	{% if test.active %}
