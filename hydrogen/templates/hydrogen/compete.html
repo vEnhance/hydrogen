@@ -26,6 +26,13 @@ which is in about
 <a href="{% url 'update_key' sub_key.id %}">Edit team info.</a></p>
 <hr />
 
+<h4>Problems</h4>
+<ul>
+	<li><a href="{{ test.problems_url }}">Problems</li>
+	<li><a href="{{ test.organization.get_absolute_url }}">
+			Info about {{ test.organization }}</a></li>
+</ul>
+
 <h4>Submit Answer</h4>
 
 <p>Your current score is <b>{{ score }}</b>.</p>

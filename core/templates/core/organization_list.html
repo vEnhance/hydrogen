@@ -4,11 +4,16 @@
 designed to host short-answer math contests.
 It was originally developed for HMMT by Yang Liu and Evan Chen.</p>
 
+<h3>Start contest</h3>
+<p>To jump right in, see the <a href="{% url 'hydrogen-active' %}">
+    list of active contest.</a></p>
+
+<h3>Contests hosted on Hydrogen</h3>
 <p>This is a list of contests hosted on this server.</p>
 
 {% for object in object_list %}
-<h3><a href="{{ object.get_absolute_url }}">{{ object }}</a></h3>
-<p>{{ object.short_description|safe }}</p>
+    <h4><a href="{{ object.get_absolute_url }}">{{ object }}</a></h4>
+    <p>{{ object.short_description|safe }}</p>
 {% endfor %}
 
 {% endblock %}
