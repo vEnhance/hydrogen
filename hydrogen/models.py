@@ -60,9 +60,10 @@ class SubmissionKey(models.Model):
 			"e.g. \"MIT Beavers\", \"Yang the Sheep\". "
 			"For individual students this can be the same "
 			"as the real name.")
-	real_name = models.CharField(max_length=200,
-			help_text = "Comma separated list of the "
-			"real name(s) of participants(s) taking the test.")
+	real_name = models.TextField(max_length=240,
+			verbose_name = "Real name(s) of participant(s), separated by newlines",
+			help_text = "Enter the real name(s) of "
+			"all participants(s) taking the test, one per line.")
 	email = models.EmailField(max_length=80,
 			help_text = "Email used to contact participant(s) "
 			"if necessary.")
