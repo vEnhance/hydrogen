@@ -15,7 +15,7 @@ class Test(models.Model):
 			help_text = "Name of test", unique=True)
 	description = models.TextField(default='',
 			help_text = "Description of the test (shown on listing).")
-	problems_url = models.CharField(max_length=150,
+	problems_url = models.TextField(
 			help_text = "The URL to the problems file or page")
 	organization = models.ForeignKey(core.models.Organization,
 			on_delete = models.CASCADE,
