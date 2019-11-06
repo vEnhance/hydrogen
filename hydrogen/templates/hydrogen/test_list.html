@@ -32,6 +32,7 @@
 	{% endif %}
 	{% if request.user.is_staff %}
 	<li><a href="{% url 'scoreboard' test.id %}">Scoreboard (staff)</a></li>
+	<li><a href="{% url 'csv-scores' test.id %}">CSV scores (staff)</a></li>
 	{% endif %}
 	{% if request.user.is_superuser %}
 	<li><a href="{% url 'admin:hydrogen_test_change' test.id  %}">Edit contest (admin)</a></li>

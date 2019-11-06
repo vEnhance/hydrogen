@@ -12,6 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import F, Sum, Case, When
 from django.views.generic.edit import UpdateView
 from django.core.exceptions import PermissionDenied
+import csv
 
 # Create your views here.
 
@@ -75,6 +76,9 @@ def new_key(request, test_id):
 			new_sub_key.test = test
 			new_sub_key.end_time = timezone.now() + \
 					timedelta(minutes=test.time_limit)
+			if test.is_indiv: # lmao this is a hack let's be clear
+				new_sub_key.real_name = "%s (%s)" \
+						%(new_sub_key.display_name, new_sub_key.real_name)
 			new_sub_key.save()
 			set_sub_key(request, test_id, str(new_sub_key.id))
 			return HttpResponseRedirect(
@@ -211,19 +215,71 @@ def scoreboard(request, test_id):
 	submissions = models.SubmissionKey.objects\
 			.filter(test = test)\
 			.annotate(total_score = Sum(Case(
-				When(
-					attempt__problem__answer
+				When(attempt__problem__answer
 						= F('attempt__student_answer'),
 					then = F('attempt__problem__weight')),
 				default = 0)))\
 			.order_by('-total_score')\
 			.values('total_score', 'display_name', 'id')
-
 	context = {
 			'submissions' : submissions,
 			'test' : test,
 			}
 	return render(request, "hydrogen/scoreboard.html", context)
+
+@staff_member_required
+def csv_scores(request, test_id):
+	test = models.Test.objects.get(id = test_id)
+	if not test.organization.check_permission(request.user):
+		raise PermissionDenied("You don't run this contest.")
+
+	all_data = models.Attempt.objects.filter(problem__test=test)\
+			.order_by('time')\
+			.values('problem__weight',
+					'problem__number',
+					'problem__answer',
+					'student_answer',
+					'submission_key__id',
+					'submission_key__display_name',
+					'submission_key__real_name',
+					'submission_key__email')
+	num_problems = models.Problem.objects.filter(test=test).count()
+	scoredata = {}
+	metadata = {}
+	for d in all_data:
+		k = d['submission_key__id']
+		if not k in metadata:
+			metadata[k] = [
+					d['submission_key__id'],
+					d['submission_key__display_name'],
+					d['submission_key__real_name'],
+					d['submission_key__email'],
+					]
+			scoredata[k] = [None] * num_problems
+		i = d['problem__number'] - 1
+		if d['problem__answer'] == d['student_answer']:
+			scoredata[k][i] = d['problem__weight']
+		else:
+			scoredata[k][i] = 0
+
+	def ssum(x):
+		return sum(_ or 0 for _ in x)
+	items = list(scoredata.items())
+	# sort by total score
+	items.sort(key = lambda item : -ssum(item[1]))
+	print(items)
+
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = \
+		'attachment; filename="%s - Scores %s.csv"' \
+		%(test.name, timezone.now().strftime("%Y%m%d-%H%M%S"))
+	writer = csv.writer(response)
+
+	writer.writerow(["Key", "Name", "Real Name", "Email", "Total"] \
+			+ ["P"+str(i+1) for i in range(num_problems)])
+	for k, scores in items:
+		writer.writerow(metadata[k] + [ssum(scores)] + scores)
+	return response
 
 class UpdateKey(UpdateView):
 	model = models.SubmissionKey
