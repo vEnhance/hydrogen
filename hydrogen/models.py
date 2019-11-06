@@ -25,10 +25,12 @@ class Test(models.Model):
 			help_text = "Latest you can start the test")
 	active = models.BooleanField(default=False,
 			help_text = "Is the contest currently active?")
-	time_limit = models.PositiveIntegerField(default = 50,
-			help_text = "How long is the contest in minutes?")
-	is_indiv = models.BooleanField(
-			help_text = "Whether the contest is individual.")
+	time_limit = models.PositiveIntegerField(blank=True, null=True,
+			help_text = "How long is the contest in minutes? "
+			"Leave blank for no time limit at all.")
+	team_size = models.PositiveIntegerField(default = 1,
+			help_text = "Number of students per team; "
+			"use 1 for individual.")
 
 	publish_problems = models.BooleanField(default=False,
 			help_text = "Show the problems URL to the public "
@@ -38,14 +40,9 @@ class Test(models.Model):
 					"on each problem on the test for live-grading. "
 					"Set to zero if you don't want live-grading.")
 
-	publish_problems = models.BooleanField(default=False,
-			help_text = "Show the problems URL to the public "
-			"at the start of the exam.")
-	max_attempts = models.PositiveIntegerField(default = 0,
-			help_text = "Number of available attempts "
-					"on each problem on the test for live-grading. "
-					"Set to zero if you don't want live-grading.")
-
+	@property
+	def is_indiv(self):
+		return (self.team_size == 1)
 	@property
 	def is_live_grading(self):
 		return (self.max_attempts != 0)

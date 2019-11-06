@@ -74,8 +74,11 @@ def new_key(request, test_id):
 		if form.is_valid():
 			new_sub_key = form.save(commit=False)
 			new_sub_key.test = test
-			new_sub_key.end_time = timezone.now() + \
-					timedelta(minutes=test.time_limit)
+			if test.time_limit is not None:
+				new_sub_key.end_time = timezone.now() + \
+						timedelta(minutes=test.time_limit)
+			else:
+				new_sub_key.end_time = test.exam_window_end
 			if test.is_indiv: # lmao this is a hack let's be clear
 				new_sub_key.real_name = "%s (%s)" \
 						%(new_sub_key.display_name, new_sub_key.real_name)

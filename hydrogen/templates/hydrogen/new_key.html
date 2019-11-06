@@ -11,10 +11,12 @@ that you can access your submission later!</p>
 
 {% if form %}
 {% include 'generic-form.html' with form=form %}
+
+<hr />
+{% if test.time_limit %}
 <p>Note that the timer starts immediately
-once you press the above button!
-You cannot change the values after submission,
-so please check everything is entered correctly.</p>
+once you press the above button!</p>
+{% endif %}
 
 {% else %}
 <p>This test is not currently accepting new submissions.</p>

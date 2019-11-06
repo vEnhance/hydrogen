@@ -20,8 +20,21 @@
 	</li>
 	<li>Start of window: {{ test.exam_window_start|date:"r" }}</li>
 	<li>End of window: {{ test.exam_window_end|date:"r" }}</li>
+	{% if test.time_limit %}
 	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
-	<li>Attempts per problem: {{ test.max_attempts }}</li>
+	{% else %}
+	<li>Time limit: None</li>
+	{% endif %}
+	{% if test.max_attempts > 0 %}
+	<li>Attempts per problem: {{ test.max_attempts }} (live feedback)</li>
+	{% else %}
+	<li>No live feedback</li>
+	{% endif %}
+	{% if test.is_indiv %}
+	<li><b>Individual</b> contest</li>
+	{% else %}
+	<li><b>Teams of {{ test.team_size }}</b> (or fewer) students</li>
+	{% endif %}
 	{% if not test.window_not_started and test.publish_problems %}
 	<li><a href="{{ test.problems_url }}">Download problems</a></li>
 	{% endif %}
