@@ -12,45 +12,63 @@
 <p>{{ test.description }}</p>
 {% endif %}
 
-<ul>
-	<li>Organization:
-		<a href="{{ test.organization.get_absolute_url }}">
-		{{ test.organization }}
-		</a>
-	</li>
-	<li>Start of window: {{ test.exam_window_start|date:"r" }}</li>
-	<li>End of window: {{ test.exam_window_end|date:"r" }}</li>
+<div class="container-fluid">
+<div class="row">
+	<div class="col-sm-5" style="background-color:#eee;">
+	<ul>
+		{% if test.active %}
+		<li><b><a href="{% url 'load_key' test.id %}">Enter Contest</a></b>
+		{% else %}
+		<li>Contest no longer active</li>
+		{% endif %}
+		{% if not test.window_not_started and test.publish_problems %}
+		<li><b>
+			<a href="{{ test.problems_url }}">Download problems</a>
+			</b></li>
+		{% elif test.window_has_past %}
+		<li><a href="{{ test.problems_url }}">Download problems</a></li>
+		{% endif %}
+		{% if request.user.is_staff %}
+		<li><a href="{% url 'scoreboard' test.id %}">Scoreboard (staff)</a></li>
+		<li><a href="{% url 'csv-scores' test.id %}">CSV scores (staff)</a></li>
+		{% endif %}
+		{% if request.user.is_superuser %}
+		<li><a href="{% url 'admin:hydrogen_test_change' test.id  %}">Edit contest (admin)</a></li>
+		{% endif %}
+	</ul>
+	</div>
+
+	<div class="col-sm-7">
+	<ul>
+		<li>Organization:
+			<a href="{{ test.organization.get_absolute_url }}">
+			{{ test.organization }}
+			</a>
+		</li>
+		{% if test.is_indiv %}
+		<li><b>Individual</b> contest</li>
+		{% else %}
+		<li><b>Teams of {{ test.team_size }}</b> (or fewer) students</li>
+		{% endif %}
+		<li><b>{{ test.max_attempts|default:"Unlimited" }}</b>
+			attempts per problem.</li>
+		{% if test.is_live_grading %}
+		<li><b>Live</b> feedback (real-time grading)</li>
+		{% else %}
+		<li><b>No</b> feedback (answers revealed later)</li>
+		{% endif %}
+
+	<li>Starts: {{ test.exam_window_start|date:"r" }}</li>
+	<li>Ends: {{ test.exam_window_end|date:"r" }}</li>
 	{% if test.time_limit %}
 	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
 	{% else %}
-	<li>Time limit: None</li>
+	<li><b>No time limit</b> (other than window)</li>
 	{% endif %}
-	{% if test.max_attempts > 0 %}
-	<li>Attempts per problem: {{ test.max_attempts }} (live feedback)</li>
-	{% else %}
-	<li>No live feedback</li>
-	{% endif %}
-	{% if test.is_indiv %}
-	<li><b>Individual</b> contest</li>
-	{% else %}
-	<li><b>Teams of {{ test.team_size }}</b> (or fewer) students</li>
-	{% endif %}
-	{% if not test.window_not_started and test.publish_problems %}
-	<li><a href="{{ test.problems_url }}">Download problems</a></li>
-	{% endif %}
-</ul>
-<ul>
-	{% if test.active %}
-	<li><b><a href="{% url 'load_key' test.id %}">Enter Contest</a></b>
-	{% endif %}
-	{% if request.user.is_staff %}
-	<li><a href="{% url 'scoreboard' test.id %}">Scoreboard (staff)</a></li>
-	<li><a href="{% url 'csv-scores' test.id %}">CSV scores (staff)</a></li>
-	{% endif %}
-	{% if request.user.is_superuser %}
-	<li><a href="{% url 'admin:hydrogen_test_change' test.id  %}">Edit contest (admin)</a></li>
-	{% endif %}
-</ul>
+	</ul>
+	</div>
+</div>
+</div>
+
 {% endfor %}
-</ul>
 {% endblock %}
