@@ -17,11 +17,16 @@ so they can also submit answers.
 But do not send this link to anyone else
 since any-one with the link can edit your answers.</p>
 
+{% if sub_key.has_time_left %}
 <p>Time expires at <b>{{ sub_key.end_time|date:'Y-m-d G:i:s' }}</b>
 which is in about
 <b> <span id="countdown-hours">0</span> hours,
 	<span id="countdown-minutes">0</span> minutes,
 	<span id="countdown-seconds">0</span> seconds</b>.</p>
+{% else %}
+<p>Time is up (finished at
+	{{ sub_key.end_time|date:'Y-m-d G:i:s' }}).</p>
+{% endif %}
 <hr />
 
 <h4>Problems</h4>

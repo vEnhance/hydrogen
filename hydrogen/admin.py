@@ -44,8 +44,8 @@ class ProblemAdmin(admin.ModelAdmin):
 
 @admin.register(h.models.SubmissionKey)
 class SubmissionKeyAdmin(admin.ModelAdmin):
-	list_display = ('id', 'display_name', 'real_name', 'email', 'test', 'end_time',)
-	list_filter = ('test',)
+	list_display = ('id', 'display_name', 'email', 'test', 'start_time',)
+	list_filter = ('test', 'test__active',)
 	search_fields = ('display_name', 'real_name', 'email')
 
 @admin.register(h.models.Attempt)

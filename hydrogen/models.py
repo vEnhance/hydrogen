@@ -5,6 +5,8 @@ from django.urls import reverse
 
 import uuid
 from django.utils import timezone
+from datetime import timedelta
+
 
 # Create your models here.
 
@@ -25,9 +27,9 @@ class Test(models.Model):
 			help_text = "Latest you can start the test")
 	active = models.BooleanField(default=False,
 			help_text = "Is the contest currently active?")
-	time_limit = models.PositiveIntegerField(blank=True, null=True,
+	time_limit = models.PositiveIntegerField(default = 0,
 			help_text = "How long is the contest in minutes? "
-			"Leave blank for no time limit at all.")
+			"Choose 0 for no time limit at all.")
 	team_size = models.PositiveIntegerField(default = 1,
 			help_text = "Number of students per team; "
 			"use 1 for individual.")
@@ -52,6 +54,9 @@ class Test(models.Model):
 	@property
 	def window_not_started(self):
 		return timezone.now() < self.exam_window_start
+	@property
+	def show_feedback(self):
+		return self.is_live_grading or self.window_has_past
 	@property
 	def accepting_submissions(self):
 		return (not self.window_has_past) \
@@ -79,13 +84,24 @@ class SubmissionKey(models.Model):
 	test = models.ForeignKey(Test,
 			on_delete=models.CASCADE,
 			help_text = "Test that the submission is for.")
-	end_time = models.DateTimeField(
-			help_text = "Latest you can submit answers. "
-			"Set automatically by server.")
+	start_time = models.DateTimeField(
+			auto_now_add = True,
+			help_text = "The creation date.")
 	def __str__(self):
 		return self.display_name + " vs " + str(self.test)
 	def get_absolute_url(self):
 		return reverse("compete", args=(self.id,))
+	@property
+	def end_time(self):
+		if self.test.time_limit == 0:
+			return self.test.exam_window_end
+		else:
+			return min(self.test.exam_window_end,
+				self.start_time+timedelta(minutes=self.test.time_limit))
+	@property
+	def has_time_left(self):
+		return timezone.now() < self.end_time
+
 
 class Problem(models.Model):
 	test = models.ForeignKey(Test,

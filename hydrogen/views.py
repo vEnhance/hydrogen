@@ -74,11 +74,6 @@ def new_key(request, test_id):
 		if form.is_valid():
 			new_sub_key = form.save(commit=False)
 			new_sub_key.test = test
-			if test.time_limit is not None:
-				new_sub_key.end_time = timezone.now() + \
-						timedelta(minutes=test.time_limit)
-			else:
-				new_sub_key.end_time = test.exam_window_end
 			if test.is_indiv: # lmao this is a hack let's be clear
 				new_sub_key.real_name = "%s (%s)" \
 						%(new_sub_key.display_name, new_sub_key.real_name)
@@ -109,7 +104,7 @@ def grade(request, sub_key, attempt, past_attempts):
 			if d['student_answer'] == d['problem__answer']]
 
 	# Check time limit
-	if timezone.now() > sub_key.end_time:
+	if not sub_key.has_time_left:
 		messages.error(request, "Sorry, time has expired.")
 		return None
 
