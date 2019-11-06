@@ -13,7 +13,8 @@ class ProblemInline(admin.TabularInline):
 class TestAdmin(admin.ModelAdmin):
 	list_display = ('name', 'exam_window_start',
 			'exam_window_end', 'active', 'time_limit',
-			'team_size', 'publish_problems', 'max_attempts')
+			'team_size', 'publish_problems',
+			'max_attempts', 'is_live_grading')
 	inlines = (ProblemInline,)
 	search_fields = ('name',)
 	list_filter = ('active', 'organization',)

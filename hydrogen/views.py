@@ -109,8 +109,9 @@ def grade(request, sub_key, attempt, past_attempts):
 		return None
 
 	# Check not already answered correctly
-	if problem.number in already_solved:
-		messages.error(request, "You already solved %s correctly." %problem)
+	if problem.number in already_solved and problem.test.is_live_grading:
+		messages.error(request, \
+				"You already solved %s correctly." %problem)
 		return None
 
 	# Check the problem is in the right test
@@ -119,29 +120,37 @@ def grade(request, sub_key, attempt, past_attempts):
 		messages.error(request, "nani the fuck?") # ragequit
 		return None
 
-	# Check attempt limit
-	num_attempts = len([d for d in past_attempts \
-			if d['problem__number'] == problem.number])
-	attempts_left = problem.test.max_attempts - num_attempts
-	if attempts_left <= 0:
-		messages.error(request, "No attempts remaining for %s." % problem)
-		return None
+	if problem.test.max_attempts > 0:
+		# Check attempt limit
+		num_attempts = len([d for d in past_attempts \
+				if d['problem__number'] == problem.number])
+		attempts_left = problem.test.max_attempts - num_attempts
+		if attempts_left <= 0:
+			messages.error(request, "No attempts remaining for %s." % problem)
+			return None
 
-	# Now check answer
-	if student_answer == true_answer:
-		messages.success(request,
-				'Correct answer %d submitted for %s.'
-				%(student_answer, problem))
-		sub_key.save()
+	if problem.test.is_live_grading:
+		# Now check answer
+		if student_answer == true_answer:
+			messages.success(request,
+					'Correct answer %d submitted for %s.'
+					%(student_answer, problem))
+			sub_key.save()
+		else:
+			attempts_left -= 1
+			messages.warning(request,
+					'Incorrect answer %d submitted for %s. '
+					'%d attempts remaining.'
+					%(student_answer, problem, attempts_left))
+		# Student allowed to submit, so save to database
+		attempt.save()
+		return attempt
 	else:
-		attempts_left -= 1
-		messages.warning(request,
-				'Incorrect answer %d submitted for %s. '
-				'%d attempts remaining.'
-				%(student_answer, problem, attempts_left))
-	# Student allowed to submit, so save to database
-	attempt.save()
-	return attempt
+		messages.success(request,
+				'Changed to answer %d for %s.'
+				%(student_answer, problem))
+		attempt.save()
+		return attempt
 
 
 def compete(request, sub_id):
@@ -149,9 +158,11 @@ def compete(request, sub_id):
 	test = sub_key.test
 	set_sub_key(request, test.id, sub_id)
 
-	past_attempts = list(models.Attempt.objects.filter(submission_key = sub_key)\
-			.order_by('time').values('student_answer',
-				'problem__number', 'problem__answer', 'time'))
+	past_attempts = list(models.Attempt.objects\
+			.filter(submission_key = sub_key)\
+			.order_by('time')\
+			.values('student_answer', 'time',
+				'problem__number', 'problem__answer'))
 
 	if request.method == "POST":
 		form = NewAttemptForm(request.POST, test = test)
@@ -175,7 +186,7 @@ def compete(request, sub_id):
 	if reset_form: form = NewAttemptForm(test = test)
 
 	# generate history dictionary; this is a dictionary of the form
-	# n -> { answer, weight, correct, attempts }{
+	# n -> { answer, weight, correct, attempts }
 	# where attempts is a dictionary provided by values
 	history = collections.OrderedDict()
 	for p in models.Problem.objects.filter(test = test).values('number', 'answer', 'weight'):
@@ -189,8 +200,7 @@ def compete(request, sub_id):
 		n = d.pop('problem__number')
 		h = history[n]
 		h['attempts'].append(d) # add attempt to log
-		if d['student_answer'] == h['answer']:
-			h['solved'] = True # there was a submission with this correct
+		h['solved'] = (d['student_answer'] == h['answer'])
 	score = sum(h['weight'] for h in history.values() if h['solved'])
 
 	context = {

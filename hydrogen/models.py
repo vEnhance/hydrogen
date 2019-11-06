@@ -40,14 +40,13 @@ class Test(models.Model):
 	max_attempts = models.PositiveIntegerField(default = 0,
 			help_text = "Number of available attempts "
 					"on each problem on the test for live-grading. "
-					"Set to zero if you don't want live-grading.")
+					"Set to zero if you don't want a limit.")
+	is_live_grading = models.BooleanField(default=True,
+			help_text = "Whether feedback should be shown instantly.")
 
 	@property
 	def is_indiv(self):
 		return (self.team_size == 1)
-	@property
-	def is_live_grading(self):
-		return (self.max_attempts != 0)
 	@property
 	def window_has_past(self):
 		return timezone.now() > self.exam_window_end
