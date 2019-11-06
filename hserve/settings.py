@@ -15,17 +15,19 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PRODUCTION = bool(os.getenv('IS_PRODUCTION'))
+if not PRODUCTION:
+	INTERNAL_IPS = ('127.0.0.1',)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'z#_k(wz%zo=xkftdznumz)^b%zcy!)j%4hc#u63rv9xx39=hs3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: App Engine's security features ensure that it is safe to
+# have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
+# app not on App Engine, make sure to set an appropriate host here.
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -89,12 +91,24 @@ WSGI_APPLICATION = 'hserve.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+if os.getenv("DATABASE_NAME"):
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.mysql',
+			'NAME' : os.getenv("DATABASE_NAME"),
+			'USER' : os.getenv("DATABASE_USER"),
+			'PASSWORD' : os.getenv("DATABASE_PASSWORD"),
+			'HOST' : os.getenv("DATABASE_HOST"),
+			'PORT' : '5432',
+		}
+	}
+else:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		}
+	}
 
 
 # Password validation
@@ -135,3 +149,14 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_URL = '/static/'
+
+if PRODUCTION:
+	DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+	STATIC_URL = os.getenv("STATIC_URL")
+	GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME")
+	import import_export.tmp_storages
+	IMPORT_EXPORT_TMP_STORAGE_CLASS = import_export.tmp_storages.CacheStorage
+	SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+else:
+	STATIC_URL = '/static/'
+	SECRET_KEY = 'evan_chen_is_really_cool'
