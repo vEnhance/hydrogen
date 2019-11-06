@@ -69,7 +69,7 @@ def new_key(request, test_id):
 		form = None
 	elif request.method == "POST":
 		assert test.accepting_submissions
-		form = NewSubmissionKeyForm(request.POST)
+		form = NewSubmissionKeyForm(request.POST, test = test)
 		if form.is_valid():
 			new_sub_key = form.save(commit=False)
 			new_sub_key.test = test
@@ -80,7 +80,7 @@ def new_key(request, test_id):
 			return HttpResponseRedirect(
 					reverse("compete", args=(new_sub_key.id,)))
 	else:
-		form = NewSubmissionKeyForm()
+		form = NewSubmissionKeyForm(test = test)
 	context = {'form' : form, 'test' : test}
 	return render(request, "hydrogen/new_key.html", context)
 

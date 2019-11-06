@@ -11,7 +11,9 @@ class ProblemInline(admin.TabularInline):
 
 @admin.register(h.models.Test)
 class TestAdmin(admin.ModelAdmin):
-	list_display = ('name', 'exam_window_start', 'exam_window_end', 'active', 'time_limit', 'publish_problems', 'max_attempts')
+	list_display = ('name', 'exam_window_start',
+			'exam_window_end', 'active', 'time_limit',
+			'is_indiv', 'publish_problems', 'max_attempts')
 	inlines = (ProblemInline,)
 	search_fields = ('name',)
 	list_filter = ('active', 'organization',)

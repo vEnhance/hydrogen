@@ -27,6 +27,16 @@ class Test(models.Model):
 			help_text = "Is the contest currently active?")
 	time_limit = models.PositiveIntegerField(default = 50,
 			help_text = "How long is the contest in minutes?")
+	is_indiv = models.BooleanField(
+			help_text = "Whether the contest is individual.")
+
+	publish_problems = models.BooleanField(default=False,
+			help_text = "Show the problems URL to the public "
+			"at the start of the exam.")
+	max_attempts = models.PositiveIntegerField(default = 0,
+			help_text = "Number of available attempts "
+					"on each problem on the test for live-grading. "
+					"Set to zero if you don't want live-grading.")
 
 	publish_problems = models.BooleanField(default=False,
 			help_text = "Show the problems URL to the public "
@@ -64,9 +74,8 @@ class SubmissionKey(models.Model):
 			"For individual students this can be the same "
 			"as the real name.")
 	real_name = models.TextField(max_length=240,
-			verbose_name = "Real name(s) of participant(s), separated by newlines",
-			help_text = "Enter the real name(s) of "
-			"all participants(s) taking the test, one per line.")
+			verbose_name = "Real name(s) of participant(s)",
+			help_text = "Real name(s) of participants(s), one per line.")
 	email = models.EmailField(max_length=80,
 			help_text = "Email used to contact participant(s) "
 			"if necessary.")
