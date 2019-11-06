@@ -1,0 +1,28 @@
+# [START django_app]
+runtime: python37
+
+handlers:
+  - url: /static
+    static_dir: static/
+  - url: .*
+    script: auto
+
+instance_class: B1
+basic_scaling:
+  max_instances: 2
+  idle_timeout: 10m
+
+beta_settings:
+  cloud_sql_instances: <fill-in>
+
+env_variables:
+  DATABASE_NAME: <fill-in>
+  DATABASE_USER: <fill-in>
+  DATABASE_PASSWORD: <fill-in>
+  DATABASE_HOST: <fill-in>
+  STATIC_URL: <fill-in>
+  GOOGLE_APPLICATION_CREDENTIALS: <fill-in path to json>
+  IS_PRODUCTION: 1
+  DJANGO_SECRET_KEY: <fill-in>
+
+# [END django_app]
