@@ -12,7 +12,7 @@ class Organization(models.Model):
 	group = models.ForeignKey(auth.Group,
 			on_delete = models.CASCADE,
 			help_text = "The group for users who are run this.")
-	slug = models.SlugField("A slug for the URL for the about page.",
+	slug = models.SlugField(help_text = "A slug for the URL for the about page.",
 			unique = True)
 
 	short_description = models.TextField(default='',
