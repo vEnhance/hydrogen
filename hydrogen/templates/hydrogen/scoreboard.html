@@ -1,8 +1,9 @@
 {% extends 'hydrogen/layout.html' %}
 
-{% block title %}Scoreboard for {{ test }} (Staff){% endblock %}
+{% block title %}Scoreboard: {{ test }}{% endblock %}
 {% block layout-content %}
-<h2>Scoreboard for {{ test }} (Staff)</h2>
+<h2>{{ test }}</h2>
+<h3>Live admin scoreboard</h3>
 
 {% if test.accepting_submissions %}
 <p>This test is still accepting submissions, so be careful!.</p>
@@ -10,12 +11,20 @@
 <p>This test is not currently accepting new submissions.</p>
 {% endif %}
 
-<p></p>
-<ol>
-	{% for sub in submissions %}
-	<li>Score <b>{{ sub.total_score }}</b>: {{ sub.display_name }}
-		<a href="{% url 'compete' sub.id %}">(edit)</a>
-	</li>
+<table class="table">
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Score</th>
+		<th scope="col">Breakdown</th>
+		<th scope="col">Name</th>
+	</tr>
+	{% for row in rows %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+		<td><b>{{ row.total }}</b></td>
+		<td style="font-family:monospace;">{% for x in row.scores %}{% if x %}*{% else %}.{% endif %}{% endfor %}</td>
+		<td><a href="{% url 'compete' row.id %}">{{ row.name }}</a></td>
+	</tr>
 	{% endfor %}
-</ol>
+</table>
 {% endblock %}

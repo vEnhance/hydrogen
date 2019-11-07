@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from django.utils import timezone
 import collections
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import F, Sum, Case, When
+from django.db.models import F, Sum, Case, When, Subquery, OuterRef
 from django.views.generic.edit import UpdateView
 from django.core.exceptions import PermissionDenied
 import csv
@@ -212,35 +212,10 @@ def compete(request, sub_id):
 			}
 	return render(request, "hydrogen/compete.html", context)
 
-
-@staff_member_required
-def scoreboard(request, test_id):
-	test = models.Test.objects.get(id = test_id)
-	if not test.organization.check_permission(request.user):
-		raise PermissionDenied("You don't run this contest.")
-
-	# oh boy I love querysets
-	submissions = models.SubmissionKey.objects\
-			.filter(test = test)\
-			.annotate(total_score = Sum(Case(
-				When(attempt__problem__answer
-						= F('attempt__student_answer'),
-					then = F('attempt__problem__weight')),
-				default = 0)))\
-			.order_by('-total_score')\
-			.values('total_score', 'display_name', 'id')
-	context = {
-			'submissions' : submissions,
-			'test' : test,
-			}
-	return render(request, "hydrogen/scoreboard.html", context)
-
-@staff_member_required
-def csv_scores(request, test_id):
-	test = models.Test.objects.get(id = test_id)
-	if not test.organization.check_permission(request.user):
-		raise PermissionDenied("You don't run this contest.")
-
+# Auxiliary grading functions
+def ssum(x):
+	return sum(_ or 0 for _ in x)
+def get_score_data(test):
 	all_data = models.Attempt.objects.filter(problem__test=test)\
 			.order_by('time')\
 			.values('problem__weight',
@@ -269,13 +244,43 @@ def csv_scores(request, test_id):
 			scoredata[k][i] = d['problem__weight']
 		else:
 			scoredata[k][i] = 0
+	return (metadata, scoredata, num_problems)
 
-	def ssum(x):
-		return sum(_ or 0 for _ in x)
+
+@staff_member_required
+def scoreboard(request, test_id):
+	test = models.Test.objects.get(id = test_id)
+	if not test.organization.check_permission(request.user):
+		raise PermissionDenied("You don't run this contest.")
+
+	def row_gen():
+		metadata, scoredata, num_problems = get_score_data(test)
+		items = list(scoredata.items())
+		items.sort(key = lambda item : -ssum(item[1]))
+		for sub_id, scores in items:
+			row = {}
+			row['id'] = sub_id
+			row['name'] = metadata[sub_id][1]
+			row['scores'] = scoredata[sub_id]
+			row['total'] = ssum(row['scores'])
+			yield row
+
+	context = {
+			'rows' : row_gen(),
+			'test' : test,
+			}
+	return render(request, "hydrogen/scoreboard.html", context)
+
+@staff_member_required
+def csv_scores(request, test_id):
+	test = models.Test.objects.get(id = test_id)
+	if not test.organization.check_permission(request.user):
+		raise PermissionDenied("You don't run this contest.")
+
+	metadata, scoredata, num_problems = get_score_data(test)
 	items = list(scoredata.items())
 	# sort by total score
 	items.sort(key = lambda item : -ssum(item[1]))
-	print(items)
 
 	response = HttpResponse(content_type='text/csv')
 	response['Content-Disposition'] = \
