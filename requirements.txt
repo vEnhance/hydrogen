@@ -1,7 +1,7 @@
 confusable-homoglyphs==3.2.0
 defusedxml==0.6.0
 diff-match-patch==20181111
-Django==2.2.7
+Django==2.2.8
 django-bootstrap3==11.1.0
 django-compat==1.0.15
 django-crispy-forms==1.8.0
