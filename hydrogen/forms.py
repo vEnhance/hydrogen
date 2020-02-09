@@ -63,3 +63,6 @@ class NewAttemptForm(forms.ModelForm):
 	class Meta:
 		model = models.Attempt
 		fields = ('problem', 'student_answer',)
+
+class InputAnswerForm(forms.Form):
+	answer = forms.IntegerField(label="", required=False)

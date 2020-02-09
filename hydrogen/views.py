@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, HttpResponse
 from django.urls import reverse
-from .forms import NewSubmissionKeyForm, NewAttemptForm
+from django.forms import formset_factory
+from .forms import NewSubmissionKeyForm, NewAttemptForm, InputAnswerForm
 from . import models
 from datetime import timedelta
 from django.views import generic
@@ -157,36 +158,51 @@ def compete(request, sub_id):
 	sub_key = get_object_or_404(models.SubmissionKey, pk = sub_id)
 	test = sub_key.test
 	set_sub_key(request, test.id, sub_id)
+	num_problems = test.num_problems
 
+	# get all past attempts
 	past_attempts = list(models.Attempt.objects\
 			.filter(submission_key = sub_key)\
 			.order_by('time')\
 			.values('student_answer', 'time',
 				'problem__number', 'problem__answer'))
 
-	if request.method == "POST":
-		form = NewAttemptForm(request.POST, test = test)
-		if form.is_valid():
-			# Create object, get relevant grading data
-			attempt = form.save(commit=False)
-			attempt = grade(request, sub_key, attempt, past_attempts)
-			if attempt is not None:
-				d = {
-						'problem__number' : attempt.problem.number,
-						'problem__answer' : attempt.problem.answer,
-						'time' : attempt.time,
-						'student_answer': attempt.student_answer,
-						}
-				past_attempts.append(d) # add to log
-				reset_form = attempt.correct # reset form iff correct
-			else: reset_form = False # attempt rejected, allow correction
-		else: reset_form = False # invalid form, allow correction
-	else: reset_form = True # no form, reset form
+	# calculate the most recent answer for each
+	most_recent_answers = [None] * num_problems
+	for d in past_attempts:
+		most_recent_answers[int(d['problem__number'])-1] = d['student_answer']
+	InputAnswerFactory = formset_factory(InputAnswerForm,
+			extra=0, max_num = num_problems, validate_max = True)
+	formset_initial_data = [{} if _ is None else {'answer' : _} for _ in most_recent_answers]
 
-	if reset_form: form = NewAttemptForm(test = test)
+	if request.method == "POST":
+		formset = InputAnswerFactory(request.POST, initial = formset_initial_data)
+		if formset.is_valid():
+			reset_formset = True # STUB: to be fixed
+			# Create object, get relevant grading data
+#			attempt = form.save(commit=False)
+#			attempt = grade(request, sub_key, attempt, past_attempts)
+#			if attempt is not None:
+#				d = {
+#						'problem__number' : attempt.problem.number,
+#						'problem__answer' : attempt.problem.answer,
+#						'time' : attempt.time,
+#						'student_answer': attempt.student_answer,
+#						}
+#				past_attempts.append(d) # add to log
+#				reset_formset = attempt.correct # reset form iff correct
+#			# else:
+#				reset_formset = False # attempt rejected, allow correction
+		else:
+			reset_formset = False # invalid form, allow correction
+	else:
+		reset_formset = True # no form, reset form
+
+	if reset_formset:
+		formset = InputAnswerFactory(initial = formset_initial_data)
 
 	# generate history dictionary; this is a dictionary of the form
-	# n -> { answer, weight, correct, attempts }
+	# n -> { answer, weight, correct, attempts,  }
 	# where attempts is a dictionary provided by values
 	history = collections.OrderedDict()
 	for p in models.Problem.objects.filter(test = test).values('number', 'answer', 'weight'):
@@ -198,15 +214,16 @@ def compete(request, sub_id):
 				}
 	for d in past_attempts:
 		n = d.pop('problem__number')
-		h = history[n]
-		h['attempts'].append(d) # add attempt to log
-		h['solved'] = (d['student_answer'] == h['answer'])
+		history[n]['attempts'].append(d) # add attempt to log
+		history[n]['solved'] = (d['student_answer'] == history[n]['answer'])
+	for n in range(1, num_problems+1):
+		history[n]['form'] = formset.forms[n-1]
 	score = sum(h['weight'] for h in history.values() if h['solved'])
 
 	context = {
 			'sub_key' : sub_key,
 			'test' : test,
-			'form' : form,
+			'formset' : formset,
 			'score' : score,
 			'history' : history,
 			}

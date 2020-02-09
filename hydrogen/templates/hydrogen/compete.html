@@ -1,4 +1,5 @@
 {% extends 'hydrogen/layout.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}{{ test }}: {{ sub_key.display_name }}{% endblock %}
 
@@ -39,7 +40,7 @@ You started at {{ sub_key.start_time|date:'Y-m-d G:i:s' }}.</p>
 
 <hr />
 
-<h4>Submit Answer</h4>
+<h4>Your Answers</h4>
 {% if test.show_feedback %}
 <p>Your current score is <b>{{ score }}</b>.</p>
 {% endif %}
@@ -49,15 +50,15 @@ Before you submit an answer, double-check that you are answering
 the correct question!</p>
 {% endif %}
 
-{# TODO we'll change this #}
-{% include "generic-form.html" with form=form %}
-
-<hr />
-
-<h4>Full log</h4>
+<form action="{{ request.path }}" method="post">
+{% csrf_token %}
+{{ formset.management_form }}
 <table class="table">
 	<tr>
-	<th>#</th><th>Weight</th><th>Log</th></tr>
+		<th style="width:6em;">Problem</th>
+		<th style="width:8em;">Submit</th>
+		<th>Log</th>
+	</tr>
 	{% for n, h in history.items %}
 	{% if h.solved and test.show_feedback %}
 	<tr style="background-color: #cfffe4">
@@ -66,8 +67,10 @@ the correct question!</p>
 	{% else %}
 	<tr>
 	{% endif %}
-	<th>#{{ n }}</th>
-	<td>{{ h.weight }} pts</td>
+	<td><b>#{{ n }}</b>
+		<p>{{h.weight}} pt{{h.weight|pluralize}}.</p>
+	</td>
+	<td>{{ h.form|crispy }}</td>
 	<td>
 		<ul>
 		{% for d in h.attempts %}
@@ -86,6 +89,8 @@ the correct question!</p>
 	</tr>
 	{% endfor %}
 </table>
+<button type="submit" class="btn btn-success">Submit answers</button>
+</form>
 
 <hr />
 <h4>Team information</h4>
