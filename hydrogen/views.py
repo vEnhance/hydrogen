@@ -154,7 +154,11 @@ def compete(request, sub_id):
 			.values('id', 'number', 'answer', 'weight')
 			# ordered by number
 	num_problems = len(problems_data_list)
-	set_sub_key(request, test.id, sub_id)
+
+	if test.organization.check_permission(request.user):
+		messages.warning(request, "You are viewing this submission as an administrator.")
+	else:
+		set_sub_key(request, test.id, sub_id)
 
 	# get all past attempts
 	past_attempts = list(models.Attempt.objects\
