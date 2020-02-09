@@ -40,7 +40,7 @@ You started at {{ sub_key.start_time|date:'Y-m-d G:i:s' }}.</p>
 
 <hr />
 
-<h4>Your Answers</h4>
+<h4>Your Responses</h4>
 {% if test.show_feedback %}
 <p>Your current score is <b>{{ score }}</b>.</p>
 {% endif %}
@@ -59,7 +59,7 @@ the correct question!</p>
 		<th style="width:8em;">Submit</th>
 		<th>Log</th>
 	</tr>
-	{% for n, h in history.items %}
+	{% for pid, h in history.items %}
 	{% if h.solved and test.show_feedback %}
 	<tr style="background-color: #cfffe4">
 	{% elif h.attempts|length and test.show_feedback %}
@@ -67,7 +67,7 @@ the correct question!</p>
 	{% else %}
 	<tr>
 	{% endif %}
-	<td><b>#{{ n }}</b>
+	<td><b>#{{ h.number }}</b>
 		<p>{{h.weight}} pt{{h.weight|pluralize}}.</p>
 	</td>
 	<td>{{ h.form|crispy }}</td>
@@ -77,7 +77,7 @@ the correct question!</p>
 		<li>At {{ d.time|date:'Y-m-d G:i:s' }},
 		{% if not test.show_feedback %}
 		submitted {{ d.student_answer }}.
-		{% elif d.problem__answer != d.student_answer %}
+		{% elif h.problem_answer != d.student_answer %}
 		submitted {{ d.student_answer }}, INCORRECT.
 		{% else %}
 		submitted <b>{{ d.student_answer }}</b>, <b>SOLVED</b>.

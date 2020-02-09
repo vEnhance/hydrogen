@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.forms import formset_factory
 from .forms import NewSubmissionKeyForm, NewAttemptForm, InputAnswerForm
 from . import models
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.views import generic
 from django.contrib import messages
 from django.forms.models import model_to_dict
@@ -96,128 +96,133 @@ def load_key(request, test_id):
 		return HttpResponseRedirect(
 				reverse("new_key", args=(test_id,)))
 
-def grade(request, sub_key, attempt, past_attempts):
-	attempt.submission_key = sub_key
-	problem = attempt.problem
-	true_answer = problem.answer
-	student_answer = attempt.student_answer
-	already_solved = [d['problem__number'] for d in past_attempts
-			if d['student_answer'] == d['problem__answer']]
+
+def grade(request, sub_key, test, p, student_answer, past_attempts, most_recent_answers):
+	"""Return True if grading OK, and False else"""
+	true_answer = p['answer']
+	already_solved = most_recent_answers.get(p['id'], 'None') == true_answer
 
 	# Check time limit
 	if not sub_key.has_time_left:
 		messages.error(request, "Sorry, time has expired.")
-		return None
+		return False
 
 	# Check not already answered correctly
-	if problem.number in already_solved and problem.test.is_live_grading:
+	if already_solved and test.is_live_grading:
 		messages.error(request, \
-				"You already solved %s correctly." %problem)
-		return None
+				"You already solved problem %s correctly." %p['number'])
+		return False
 
-	# Check the problem is in the right test
-	# (only if malicious input or serious bug)
-	if not problem.test == sub_key.test:
-		messages.error(request, "nani the fuck?") # ragequit
-		return None
-
-	if problem.test.max_attempts > 0:
+	if test.max_attempts > 0:
 		# Check attempt limit
 		num_attempts = len([d for d in past_attempts \
-				if d['problem__number'] == problem.number])
-		attempts_left = problem.test.max_attempts - num_attempts
+				if d['problem__id'] == p['id']])
+		attempts_left = test.max_attempts - num_attempts
 		if attempts_left <= 0:
-			messages.error(request, "No attempts remaining for %s." % problem)
-			return None
+			messages.error(request, "No attempts remaining for problem %s." % p['number'])
+			return False
 
-	if problem.test.is_live_grading:
+	if test.is_live_grading:
 		# Now check answer
 		if student_answer == true_answer:
 			messages.success(request,
-					'Correct answer %d submitted for %s.'
-					%(student_answer, problem))
+					'Correct answer %d submitted for problem %s.'
+					%(student_answer, p['number']))
 			sub_key.save()
 		else:
 			attempts_left -= 1
 			messages.warning(request,
-					'Incorrect answer %d submitted for %s. '
+					'Incorrect answer %d submitted for problem %d. '
 					'%d attempts remaining.'
-					%(student_answer, problem, attempts_left))
+					%(student_answer, p['number'], attempts_left))
 		# Student allowed to submit, so save to database
-		attempt.save()
-		return attempt
+		return True
 	else:
 		messages.success(request,
-				'Changed to answer %d for %s.'
-				%(student_answer, problem))
-		attempt.save()
-		return attempt
+				'Changed to answer %d for problem %d.'
+				%(student_answer, p['number']))
+		return True
 
 
 def compete(request, sub_id):
 	sub_key = get_object_or_404(models.SubmissionKey, pk = sub_id)
+
 	test = sub_key.test
+	problems_data_list = models.Problem.objects\
+			.filter(test=test).order_by('number')\
+			.values('id', 'number', 'answer', 'weight')
+			# ordered by number
+	num_problems = len(problems_data_list)
 	set_sub_key(request, test.id, sub_id)
-	num_problems = test.num_problems
 
 	# get all past attempts
 	past_attempts = list(models.Attempt.objects\
 			.filter(submission_key = sub_key)\
 			.order_by('time')\
-			.values('student_answer', 'time',
-				'problem__number', 'problem__answer'))
+			.values('student_answer', 'time', 'problem__id'))
 
 	# calculate the most recent answer for each
-	most_recent_answers = [None] * num_problems
+	most_recent_answers = {}
 	for d in past_attempts:
-		most_recent_answers[int(d['problem__number'])-1] = d['student_answer']
-	InputAnswerFactory = formset_factory(InputAnswerForm,
-			extra=0, max_num = num_problems, validate_max = True)
-	formset_initial_data = [{} if _ is None else {'answer' : _} for _ in most_recent_answers]
+		most_recent_answers[d['problem__id']] = d['student_answer']
+
+	# get initial data
+	InputAnswerFactory = formset_factory(InputAnswerForm, extra=0,
+			min_num = num_problems, validate_min = True,
+			max_num = num_problems, validate_max = True)
+	formset_initial_data = []
+	for p in problems_data_list:
+		if p['id'] in most_recent_answers:
+			formset_initial_data.append({'answer' : most_recent_answers[p['id']]})
+		else:
+			formset_initial_data.append({})
 
 	if request.method == "POST":
 		formset = InputAnswerFactory(request.POST, initial = formset_initial_data)
 		if formset.is_valid():
-			reset_formset = True # STUB: to be fixed
-			# Create object, get relevant grading data
-#			attempt = form.save(commit=False)
-#			attempt = grade(request, sub_key, attempt, past_attempts)
-#			if attempt is not None:
-#				d = {
-#						'problem__number' : attempt.problem.number,
-#						'problem__answer' : attempt.problem.answer,
-#						'time' : attempt.time,
-#						'student_answer': attempt.student_answer,
-#						}
-#				past_attempts.append(d) # add to log
-#				reset_formset = attempt.correct # reset form iff correct
-#			# else:
-#				reset_formset = False # attempt rejected, allow correction
-		else:
-			reset_formset = False # invalid form, allow correction
+			attempts_to_bulk_create = []
+			for i, form in enumerate(formset):
+				p = problems_data_list[i]
+				if not form.has_changed():
+					continue
+				student_answer = form.cleaned_data['answer']
+				if student_answer is None:
+					continue
+				_ = grade(request, sub_key, test, p, student_answer,\
+						past_attempts, most_recent_answers)
+				if _ is True:
+					# Create object we'll save to database later
+					attempt = models.Attempt(submission_key = sub_key,
+							student_answer = student_answer,
+							problem_id = p['id'])
+					attempts_to_bulk_create.append(attempt)
+					# Add the results to past_attempts and most_recent_answers
+					past_attempts.append({
+						'problem__id' : p['id'],
+						'student_answer' : student_answer,
+						'time' : datetime.now()
+						})
+					most_recent_answers[p['id']] = student_answer
+			models.Attempt.objects.bulk_create(attempts_to_bulk_create)
 	else:
-		reset_formset = True # no form, reset form
-
-	if reset_formset:
 		formset = InputAnswerFactory(initial = formset_initial_data)
 
 	# generate history dictionary; this is a dictionary of the form
-	# n -> { answer, weight, correct, attempts,  }
+	# pid -> { number, answer, weight, correct, attempts,  }
 	# where attempts is a dictionary provided by values
 	history = collections.OrderedDict()
-	for p in models.Problem.objects.filter(test = test).values('number', 'answer', 'weight'):
-		history[p['number']] = {
-				'answer' : p['answer'],
+	for i, p in enumerate(problems_data_list):
+		history[p['id']] = {
+				'number' : p['number'],
+				'problem_answer' : p['answer'],
 				'weight' : p['weight'],
-				'solved' : False, # set to True later
-				'attempts' : []
+				'solved' : most_recent_answers.get(p['id'], None) == p['answer'],
+				'attempts' : [],
+				'form' : formset.forms[i],
 				}
 	for d in past_attempts:
-		n = d.pop('problem__number')
-		history[n]['attempts'].append(d) # add attempt to log
-		history[n]['solved'] = (d['student_answer'] == history[n]['answer'])
-	for n in range(1, num_problems+1):
-		history[n]['form'] = formset.forms[n-1]
+		pid = d.pop('problem__id')
+		history[pid]['attempts'].append(d) # add attempt to log
 	score = sum(h['weight'] for h in history.values() if h['solved'])
 
 	context = {

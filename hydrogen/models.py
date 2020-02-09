@@ -60,9 +60,6 @@ class Test(models.Model):
 	def show_feedback(self):
 		return self.is_live_grading or self.window_has_past
 	@property
-	def num_problems(self):
-		return Problem.objects.filter(test=self).count()
-	@property
 	def accepting_submissions(self):
 		return (not self.window_has_past) \
 				and (not self.window_not_started) \
