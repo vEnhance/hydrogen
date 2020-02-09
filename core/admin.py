@@ -6,7 +6,7 @@ from . import models
 
 @admin.register(models.Organization)
 class OrganizationAdmin(admin.ModelAdmin):
-	list_display = ('name', 'group', 'short_description',)
+	list_display = ('name', 'group', 'visible', 'short_description',)
 	search_fields = ('name', 'short_description', 'verbose_description')
 
 	def has_change_permission(self, request, obj=None):

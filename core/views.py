@@ -11,3 +11,5 @@ class OrganizationDetailView(DetailView):
 	model = models.Organization
 class OrganizationListView(ListView):
 	model = models.Organization
+	def get_queryset(self):
+		return models.Organization.objects.filter(visible=True)

@@ -20,6 +20,9 @@ class Test(models.Model):
 	organization = models.ForeignKey(core.models.Organization,
 			on_delete = models.CASCADE,
 			help_text = "The organization running this contest.")
+	visible = models.BooleanField(help_text = "Whether to hide "\
+			"the test from main listing. "\
+			"Not meant to be a security feature.", default=True)
 
 	exam_window_start = models.DateTimeField(
 			help_text = "Earliest you can start the test")

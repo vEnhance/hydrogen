@@ -5,8 +5,11 @@
 <h2>{{ list_title }}</h2>
 
 {% for test in object_list %}
+{% if test.visible or request.user.is_staff %}
 <hr />
-<h4>{{ test.name }}</h4>
+
+<h4>{{ test.name }}
+{% if not test.visible %}[hidden]{% endif %}</h4>
 
 {% if test.description %}
 <p>{{ test.description }}</p>
@@ -70,5 +73,6 @@
 </div>
 </div>
 
+{% endif %}
 {% endfor %}
 {% endblock %}

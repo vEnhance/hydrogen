@@ -14,6 +14,8 @@ class Organization(models.Model):
 			help_text = "The group for users who are run this.")
 	slug = models.SlugField(help_text = "A slug for the URL for the about page.",
 			unique = True)
+	visible = models.BooleanField(help_text = "Whether to show "\
+			"this organization in the main listing.", default=True)
 
 	short_description = models.TextField(default='',
 			help_text = "A short description about the contest. "
