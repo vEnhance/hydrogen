@@ -2,8 +2,22 @@
 {% block layout-content %}
 <h2>{{object}}</h2>
 {% if object.external_url %}
-<a href="{{ object.external_url }}">{{ object.external_url }}</a>
+<p><a href="{{ object.external_url }}">{{ object.external_url }}</a></p>
 {% endif %}
+
+{% if num_active == 0 %}
+<p>There are currently no active contests for {{ object }}.</p>
+{% else %}
+<p><i>
+	{% if num_active == 1 %}
+	There is currently <b>1</b> active contest for {{ object }}.
+	{% else %}
+	There are currently <b>{{ num_active }}</b> active contests for {{ object }}.
+	{% endif %}
+	Go to <a href="{% url "active" %}">Active Tests</a> to see it.
+</i></p>
+{% endif %}
+
 <hr />
 {{ object.verbose_description|safe }}
 
