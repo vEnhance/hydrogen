@@ -138,9 +138,10 @@ def grade(request, sub_key, test, p, student_answer, past_attempts, most_recent_
 		# Student allowed to submit, so save to database
 		return True
 	else:
-		messages.success(request,
-				'Changed to answer %d for problem %d.'
-				%(student_answer, p['number']))
+		# It's actually kind of obnoxious
+		# messages.success(request,
+		# 		'Changed to answer %d for problem %d.'
+		# 		%(student_answer, p['number']))
 		return True
 
 
