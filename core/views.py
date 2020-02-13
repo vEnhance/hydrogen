@@ -13,7 +13,7 @@ class OrganizationDetailView(DetailView):
 	def get_context_data(self, **kwargs):
 		context = super(OrganizationDetailView, self).get_context_data(**kwargs)
 		context['num_active'] = hydrogen.models.Test.objects\
-				.filter(organization=self.object,visible=True).count()
+				.filter(organization=self.object,visible=True,active=True).count()
 		return context
 class OrganizationListView(ListView):
 	model = models.Organization
