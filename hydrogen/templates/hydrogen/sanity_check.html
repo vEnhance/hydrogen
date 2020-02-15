@@ -1,0 +1,53 @@
+{% extends 'hydrogen/layout.html' %}
+
+{% block title %}Sanity check: {{ test }}{% endblock %}
+{% block layout-content %}
+<h2>{{ test }}: Overview</h2>
+<p> Make changes through the
+<a href="{% url 'admin:hydrogen_test_change' test.id  %}">admin interface</a>.
+</p>
+
+<p>Time until window starts: <b>{{ time_until_start }}</b>.  </p>
+<ul><li><a href="{{ test.problems_url }}">Problems file</a></li></ul>
+
+<h4>Problems</h4>
+<table class="table">
+	<tr>
+		<th scope="col">#</th>
+		<th scope="col">Answer</th>
+		<th scope="col">Weight</th>
+	</tr>
+	{% for problem in problems %}
+	<tr>
+		<td>{{ problem.number }}</td>
+		<td>{{ problem.answer }}</td>
+		<td>{{ problem.weight }}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+<h4>Configuration</h4>
+<ul>
+{% if test.is_indiv %}
+<li><b>Individual</b> contest</li>
+{% else %}
+<li><b>Teams of {{ test.team_size }}</b> (or fewer) students</li>
+{% endif %}
+<li><b>{{ test.max_attempts|default:"Unlimited" }}</b>
+	attempts per problem.</li>
+{% if test.is_live_grading %}
+<li><b>Live</b> feedback (real-time grading)</li>
+{% else %}
+<li><b>No</b> feedback (answers revealed later)</li>
+{% endif %}
+
+<li>Starts: {{ test.exam_window_start|date:"r" }}</li>
+<li>Ends: {{ test.exam_window_end|date:"r" }}</li>
+{% if test.time_limit %}
+<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
+{% else %}
+<li><b>No time limit</b> (other than window)</li>
+{% endif %}
+</ul>
+
+{% endblock %}

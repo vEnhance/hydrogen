@@ -324,3 +324,16 @@ def csv_scores(request, test_id):
 class UpdateKey(UpdateView):
 	model = models.SubmissionKey
 	fields = ('display_name', 'real_name', 'email')
+
+@staff_member_required
+def sanity_check(request, pk):
+	test = models.Test.objects.get(id = pk)
+	if not test.organization.check_permission(request.user):
+		raise PermissionDenied("You don't run this contest.")
+
+	context = {
+			'problems' : models.Problem.objects.filter(test = test),
+			'time_until_start': test.exam_window_start - timezone.now(),
+			'test' : test,
+			}
+	return render(request, "hydrogen/sanity_check.html", context)

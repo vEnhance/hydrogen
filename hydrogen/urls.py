@@ -13,6 +13,7 @@ urlpatterns = [
 	url(r'^load/(?P<test_id>[0-9]+)/$', views.load_key, name='load_key'),
 	url(r'^compete/(?P<sub_id>[\w-]+)/$', views.compete, name='compete'),
 	url(r'^scoreboard/(?P<test_id>[0-9]+)/$', views.scoreboard, name='scoreboard'),
-	url(r'^csv-scores/(?P<test_id>[0-9]+)/$', views.csv_scores, name='csv-scores'),
-	url(r'^namechange/(?P<pk>[\w-]+)/$', views.UpdateKey.as_view(), name='update_key')
+	url(r'^csv-scores/(?P<test_id>[0-9]+)/$', views.csv_scores, name='csv_scores'),
+	url(r'^namechange/(?P<pk>[\w-]+)/$', views.UpdateKey.as_view(), name='update_key'),
+	url(r'^sanity-check/(?P<pk>[\w-]+)/$', views.sanity_check, name='sanity_check'),
 ]

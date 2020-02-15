@@ -33,7 +33,8 @@
 		{% endif %}
 		{% if request.user.is_staff %}
 		<li><a href="{% url 'scoreboard' test.id %}">Scoreboard (staff)</a></li>
-		<li><a href="{% url 'csv-scores' test.id %}">CSV scores (staff)</a></li>
+		<li><a href="{% url 'csv_scores' test.id %}">CSV scores (staff)</a></li>
+		<li><a href="{% url 'sanity_check' test.id %}">Show answers (staff)</a></li>
 		{% endif %}
 		{% if request.user.is_superuser %}
 		<li><a href="{% url 'admin:hydrogen_test_change' test.id  %}">Edit contest (admin)</a></li>
@@ -61,12 +62,12 @@
 		<li><b>No</b> feedback (answers revealed later)</li>
 		{% endif %}
 
-	<li>Starts: {{ test.exam_window_start|date:"r" }}</li>
-	<li>Ends: {{ test.exam_window_end|date:"r" }}</li>
-	{% if test.time_limit %}
-	<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
-	{% else %}
-	<li><b>No time limit</b> (other than window)</li>
+		<li>Starts: {{ test.exam_window_start|date:"r" }}</li>
+		<li>Ends: {{ test.exam_window_end|date:"r" }}</li>
+		{% if test.time_limit %}
+		<li>Time limit: <b>{{ test.time_limit }} minutes</b></li>
+		{% else %}
+		<li><b>No time limit</b> (other than window)</li>
 	{% endif %}
 	</ul>
 	</div>
