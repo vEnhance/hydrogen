@@ -3,5 +3,6 @@ db.sqlite3
 static/*
 media/*
 app.yaml
+venv
 venv/
 evanchen-cc-*.json
