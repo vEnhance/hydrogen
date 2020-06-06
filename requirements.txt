@@ -1,4 +1,4 @@
-Django==3.0.3
+Django==3.0.7
 django-positions>=0.6.0
 django-import-export>=2.0.1
 django-hijack>=2.1.10
